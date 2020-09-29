@@ -2,25 +2,33 @@ import os
 import telebot
 from telebot import types
 from dotenv import load_dotenv
+from bot import PasswordsBot
 
 load_dotenv()
 
 TOKEN = os.environ.get('TOKEN')
 bot = telebot.TeleBot(TOKEN)
 
+controller = PasswordsBot()
+
 
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
     print(f'Received message {message}')
-    send_message(message.from_user.id, "TEST REPLY FROM BOT")
-    send_message_with_keyboard(message.from_user.id,
-                               'Test message with keyboard',
-                               ({'text': 'RED', 'data': 'red button'},
-                                {'text': 'BLUE', 'data': 'blue button'})
-                               )
+    sender_id = message.from_user.id
+    answer = controller.get_answer(message)
+    if answer.keyboard is None:
+        send_message(sender_id, answer.message)
+    else:
+        send_message_with_keyboard(sender_id, answer.message, answer.keyboard)
+        # send_message_with_keyboard(message.from_user.id,
+        #                        'Test message with keyboard',
+        #                        ({'text': 'RED', 'data': 'red button'},
+        #                         {'text': 'BLUE', 'data': 'blue button'})
+        #                        )
 
 
-@bot.callback_query_handler(func=lambda call:True)
+@bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
     print(call)
 
