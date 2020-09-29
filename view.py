@@ -1,4 +1,5 @@
 import os
+import json
 import telebot
 from telebot import types
 from dotenv import load_dotenv
@@ -30,7 +31,14 @@ def get_text_messages(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
-    print(call)
+    action = call.data.split(' ')[0]
+    data = call.data.replace(action + ' ', "")
+    sender_id = call.from_user.id
+    answer = controller.get_button_action_response(action, data)
+    if answer.keyboard is None:
+        send_message(sender_id, answer.message)
+    else:
+        send_message_with_keyboard(sender_id, answer.message, answer.keyboard)
 
 
 def send_message(user_id, text):
