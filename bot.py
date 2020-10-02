@@ -25,7 +25,7 @@ class PasswordsBot:
         return BotAnswer('welcome message')
 
     def recommendations(self):
-        return BotAnswer('InfoSec Recommendations')
+        return BotAnswer('InfoSec Recommendations are not ready yet')
 
     def password_generation_methods(self, length):
         # second parameter of bot answer should be a keyboard with possible generation variants
@@ -54,4 +54,4 @@ class PasswordsBot:
         return BotAnswer(f'list of generated passwords of length {length} using method {method}')
 
     def check_password_strength_welcome(self):
-        return BotAnswer('a request for user to enter a password to be checked')
+        return BotAnswer('Password\'s strength check is not ready yet')
