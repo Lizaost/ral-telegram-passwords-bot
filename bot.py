@@ -44,7 +44,7 @@ class PasswordsBot:
         return BotAnswer('Select generation method',
                          ({'text': 'Lowercase letters', 'data': f'generate {length} a'},
                           {'text': 'Uppercase and lowercase letters', 'data': f'generate {length} Aa'},
-                          {'text': 'numbers', 'data': f'generate {length} 1'},
+                          {'text': 'Numbers', 'data': f'generate {length} 1'},
                           {'text': 'Letters and special symbols', 'data': f'generate {length} Aa!'},
                           {'text': 'Letters, numbers and special symbols', 'data': f'generate {length} Aa1!'},))
 
@@ -71,10 +71,6 @@ class PasswordsBot:
         [length, method] = data.split(" ")
         length = int(length)
 
-        print(NUMBERS)
-        print(LOWERCASE_LETTERS)
-        print(UPPERCASE_LETTERS)
-
         message = ""
 
         symbols_to_use = []
@@ -88,30 +84,27 @@ class PasswordsBot:
             elif c == '!':
                 symbols_to_use.extend(SPECIALS)
 
-        print(symbols_to_use)
+        password = []
 
-        for i in range(1, 6):
-            password = []
-            for c in method:
-                if c == 'A':
-                    password.append(random.choice(UPPERCASE_LETTERS)[0])
-                elif c == 'a':
-                    password.append(random.choice(LOWERCASE_LETTERS)[0])
-                elif c == '1':
-                    password.append(random.choice(NUMBERS)[0])
-                elif c == '!':
-                    password.append(random.choice(SPECIALS)[0])
+        for c in method:
+            if c == 'A':
+                password.append(random.choice(UPPERCASE_LETTERS)[0])
+            elif c == 'a':
+                password.append(random.choice(LOWERCASE_LETTERS)[0])
+            elif c == '1':
+                password.append(random.choice(NUMBERS)[0])
+            elif c == '!':
+                password.append(random.choice(SPECIALS)[0])
 
-            while len(password) < length:
-                password.append(random.choice(symbols_to_use)[0])
+        while len(password) < length:
+            password.append(random.choice(symbols_to_use)[0])
 
-            random.shuffle(password)
-            password_string = ''.join(password)
-            message += f'{i}. {password_string}\n'
+        random.shuffle(password)
+        password_string = ''.join(password)
 
-            print(password_string)
+        print(password_string)
 
-        return BotAnswer(message)
+        return BotAnswer(password_string)
 
     def check_password_strength_welcome(self):
         return BotAnswer('Password\'s strength check is not ready yet')
