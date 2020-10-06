@@ -1,4 +1,10 @@
 from bot_answer import BotAnswer
+import random
+
+SPECIALS = ['!', '@', '#', '$', '%', '^', '.', ',', '&', '*', '?', ':', ';', '+', '=']
+NUMBERS = [str(x) for x in range(0, 10)]
+LOWERCASE_LETTERS = [chr(x) for x in range(ord('a'), ord('z') + 1)]
+UPPERCASE_LETTERS = [chr(x) for x in range(ord('A'), ord('Z') + 1)]
 
 
 class PasswordsBot:
@@ -33,10 +39,13 @@ class PasswordsBot:
         # in data a string "generate_method <LENGTH> <METHOD>" should be passed ("generate 8 abc")
         # it will be checked in the bot api to route to correct function (password generation)
         #    generate 8 abc
-        print("Length from previous step is " + length)
-        return BotAnswer('available password generation methods variants with keyboard',
-                         ({'text': 'symbols', 'data': f'generate {length} abc'},
-                          {'text': 'numbers', 'data': f'generate {length} 123'}))
+        print("Length from previous step: " + length)
+        return BotAnswer('Select generation method',
+                         ({'text': 'Lowercase letters', 'data': f'generate {length} a'},
+                          {'text': 'Uppercase and lowercase letters', 'data': f'generate {length} Aa'},
+                          {'text': 'Numbers', 'data': f'generate {length} 1'},
+                          {'text': 'Letters and special symbols', 'data': f'generate {length} Aa!'},
+                          {'text': 'Letters, numbers and special symbols', 'data': f'generate {length} Aa1!'},))
 
     def password_generation_length(self):
         # second parameter of bot answer should be a keyboard with possible generation variants
@@ -46,12 +55,46 @@ class PasswordsBot:
         # 8 9 10 12 14 16 18 20
         # generate_length 8
         print()
-        return BotAnswer('possible password generation lengths with keyboard',
-                         ({'text': '8', 'data': 'generate_length 8'}, {'text': '9', 'data': 'generate_length 9'}))
+        return BotAnswer('Select password length',
+                         ({'text': '8', 'data': 'generate_length 8'},
+                          {'text': '9', 'data': 'generate_length 9'},
+                          {'text': '10', 'data': 'generate_length 10'},
+                          {'text': '12', 'data': 'generate_length 12'},
+                          {'text': '14', 'data': 'generate_length 14'},
+                          {'text': '16', 'data': 'generate_length 16'},
+                          {'text': '18', 'data': 'generate_length 18'},
+                          {'text': '20', 'data': 'generate_length 20'},
+                          ))
 
     def password_generation_results(self, data):
         [length, method] = data.split(" ")
-        return BotAnswer(f'list of generated passwords of length {length} using method {method}')
+        length = int(length)
+
+        symbols_to_use = []
+        password = []
+        for c in method:
+            if c == 'A':
+                symbols_to_use.extend(UPPERCASE_LETTERS)
+                password.append(random.choice(UPPERCASE_LETTERS)[0])
+            elif c == 'a':
+                symbols_to_use.extend(LOWERCASE_LETTERS)
+                password.append(random.choice(LOWERCASE_LETTERS)[0])
+            elif c == '1':
+                symbols_to_use.extend(NUMBERS)
+                password.append(random.choice(NUMBERS)[0])
+            elif c == '!':
+                symbols_to_use.extend(SPECIALS)
+                password.append(random.choice(SPECIALS)[0])
+
+        while len(password) < length:
+            password.append(random.choice(symbols_to_use)[0])
+
+        random.shuffle(password)
+        password_string = ''.join(password)
+
+        print(password_string)
+
+        return BotAnswer(password_string)
 
     def check_password_strength_welcome(self):
         return BotAnswer('Password\'s strength check is not ready yet')
