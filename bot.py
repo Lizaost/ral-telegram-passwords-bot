@@ -4,12 +4,12 @@ import requests
 import json
 
 from bot_answer import BotAnswer
+import random
 
 SPECIALS = ['!', '@', '#', '$', '%', '^', '.', ',', '&', '*', '?', ':', ';', '+', '=']
 NUMBERS = [str(x) for x in range(0, 10)]
 LOWERCASE_LETTERS = [chr(x) for x in range(ord('a'), ord('z') + 1)]
 UPPERCASE_LETTERS = [chr(x) for x in range(ord('A'), ord('Z') + 1)]
-
 
 class PasswordsBot:
 
@@ -43,7 +43,7 @@ class PasswordsBot:
         # in data a string "generate_method <LENGTH> <METHOD>" should be passed ("generate 8 abc")
         # it will be checked in the bot api to route to correct function (password generation)
         #    generate 8 abc
-        print("Length from previous step is " + length)
+        print("Length from previous step: " + length)
         return BotAnswer('Select generation method',
                          ({'text': 'Lowercase letters', 'data': f'generate {length} a'},
                           {'text': 'Uppercase and lowercase letters', 'data': f'generate {length} Aa'},
@@ -75,28 +75,22 @@ class PasswordsBot:
         length = int(length)
 
         message = ""
+        length = int(length)
 
         symbols_to_use = []
+        password = []
         for c in method:
             if c == 'A':
                 symbols_to_use.extend(UPPERCASE_LETTERS)
-            elif c == 'a':
-                symbols_to_use.extend(LOWERCASE_LETTERS)
-            elif c == '1':
-                symbols_to_use.extend(NUMBERS)
-            elif c == '!':
-                symbols_to_use.extend(SPECIALS)
-
-        password = []
-
-        for c in method:
-            if c == 'A':
                 password.append(random.choice(UPPERCASE_LETTERS)[0])
             elif c == 'a':
+                symbols_to_use.extend(LOWERCASE_LETTERS)
                 password.append(random.choice(LOWERCASE_LETTERS)[0])
             elif c == '1':
+                symbols_to_use.extend(NUMBERS)
                 password.append(random.choice(NUMBERS)[0])
             elif c == '!':
+                symbols_to_use.extend(SPECIALS)
                 password.append(random.choice(SPECIALS)[0])
 
         while len(password) < length:
