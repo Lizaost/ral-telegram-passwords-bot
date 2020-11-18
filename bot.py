@@ -99,8 +99,6 @@ class PasswordsBot:
         random.shuffle(password)
         password_string = ''.join(password)
 
-        print(password_string)
-
         return BotAnswer(password_string)
 
     def check_password_strength_info(self):
