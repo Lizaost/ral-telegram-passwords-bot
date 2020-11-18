@@ -1,4 +1,7 @@
 import random
+import hashlib
+import requests
+import json
 
 from bot_answer import BotAnswer
 
@@ -14,12 +17,12 @@ class PasswordsBot:
         if message.text == '/start':
             return self.start_message()
         if message.text == '/check':
-            return self.check_password_strength_welcome()
+            return self.check_password_strength_info()
         if message.text == '/generate':
             return self.password_generation_length()  # length -> methods -> results
         if message.text == '/recommendations':
             return self.recommendations()
-        return BotAnswer('I don\'t understand you')
+        return self.check_password_strength(message.text)
 
     def get_button_action_response(self, action, data):
         if action == 'generate_length':
@@ -106,5 +109,21 @@ class PasswordsBot:
 
         return BotAnswer(password_string)
 
-    def check_password_strength_welcome(self):
-        return BotAnswer('Password\'s strength check is not ready yet')
+    def check_password_strength_info(self):
+        return BotAnswer(
+            'Send me your password (ar a string with a similar structure which is better) and I will say how strong it is')
+
+    def check_password_strength(self, password):
+        # TODO (Rin): Add more check to determine password strength - length, variety of symbols, etc.
+        sha1_hash = hashlib.sha1(password.encode()).hexdigest().upper()
+        prefix = sha1_hash[:5:]
+        suffix = sha1_hash[5::]
+        res = requests.get('https://api.pwnedpasswords.com/range/' + prefix)
+        # Have I been pwned API returns list of sha1 hashes suffixes
+        # that have the same prefix that was passed as a GET query parameter
+        # with number of occurrences of the hash in bases of hacked passwords.
+        suffixes = list(map(lambda x: x.split(':')[0], res.text.split('\r\n')))
+        is_pawned = suffix in suffixes
+        message = 'Your password is found in hacked password bases' if is_pawned \
+            else 'Your password is not in databases'
+        return BotAnswer(message)

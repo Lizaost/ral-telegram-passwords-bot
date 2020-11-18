@@ -1,2 +1,4 @@
 pyTelegramBotAPI
-python-dotenv
+python-dotenv~=0.14.0
+requests~=2.24.0
+Twisted~=20.3.0
