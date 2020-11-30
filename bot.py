@@ -2,6 +2,7 @@ import random
 import hashlib
 import requests
 import json
+import re
 
 from bot_answer import BotAnswer
 import random
@@ -10,6 +11,7 @@ SPECIALS = ['!', '@', '#', '$', '%', '^', '.', ',', '&', '*', '?', ':', ';', '+'
 NUMBERS = [str(x) for x in range(0, 10)]
 LOWERCASE_LETTERS = [chr(x) for x in range(ord('a'), ord('z') + 1)]
 UPPERCASE_LETTERS = [chr(x) for x in range(ord('A'), ord('Z') + 1)]
+
 
 class PasswordsBot:
 
@@ -106,7 +108,56 @@ class PasswordsBot:
             'Send me your password (ar a string with a similar structure which is better) and I will say how strong it is')
 
     def check_password_strength(self, password):
-        # TODO (Rin): Add more check to determine password strength - length, variety of symbols, etc.
+
+        # checking password complexity
+
+        score = 0
+        message = ''
+
+        if len(password) <= 6:
+            pass
+        elif len(password) <= 8:
+            score += 1
+        elif len(password) <= 10:
+            score += 2
+        elif len(password) <= 12:
+            score += 3
+        elif len(password) <= 14:
+            score += 4
+        else:
+            score += 5
+
+        if re.search(r"[A-Z]", password):
+            score += 1.5
+        if re.search(r"[a-z]", password):
+            score += 1.5
+        if re.search(r"[0-9]", password):
+            score += 1.5
+        if re.search(r"[!@#$%^&*()№'+=]", password):
+            score += 1.5
+
+        repetitions = 0
+        for i in range(1, len(password)):
+            if password[i] == password[i - 1]: repetitions += 1
+
+        if repetitions == 0:
+            score += 2
+        elif repetitions == 1:
+            score += 1
+
+        strengthes = {
+            (0, 5): 'Your password is VERY WEAK.',
+            (5, 7): 'Your password is WEAK.',
+            (7, 9): 'Your password\'s strength is MEDIUM.',
+            (9, 11): 'Your password is STRONG.',
+            (11, 14): 'Your password is VERY STRONG.',
+        }
+
+        for (a, b), m in strengthes.items():
+            if a <= score < b:
+                message += m + "\n\n"
+
+        # Checking if password in leaked databases
         sha1_hash = hashlib.sha1(password.encode()).hexdigest().upper()
         prefix = sha1_hash[:5:]
         suffix = sha1_hash[5::]
@@ -116,6 +167,6 @@ class PasswordsBot:
         # with number of occurrences of the hash in bases of hacked passwords.
         suffixes = list(map(lambda x: x.split(':')[0], res.text.split('\r\n')))
         is_pawned = suffix in suffixes
-        message = 'Your password is found in hacked password bases' if is_pawned \
-            else 'Your password is not in databases'
+        message += 'WARNING! Your password is found in hacked password bases.' if is_pawned \
+            else 'Great! Your password is not in leaked passwords databases.'
         return BotAnswer(message)
