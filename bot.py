@@ -34,10 +34,28 @@ class PasswordsBot:
         return BotAnswer('I don\'t understand you')
 
     def start_message(self):
-        return BotAnswer('welcome message')
+        return BotAnswer(
+            'Hi! I\'m RAL passwords bot and I can generate a password for you, check strength of your current '
+            'password, and give you some information security recommendations. Use my commands /generate, /check '
+            'and /recommendations, or send me your password and I will check if it is secure.')
 
     def recommendations(self):
-        return BotAnswer('InfoSec Recommendations are not ready yet')
+        recommendations = [
+            'Use different passwords for different services.',
+            'Do not write down passwords, at least where someone else can read them. Its better to use a good '
+            'passwords manager application.',
+            'Do not share your passwords with anyone else.',
+            'Use 2FA to make your accounts more secure.',
+            'Use antivirus applications on your computer (and on mobile phone too).'
+            'Do not download and open files from from unknown senders.',
+            'Вo not follow the links in the letters without checking that it is in the right place.',
+            'Enter your personal data only on sites in which you are sure. Before entering personal data, make sure '
+            'that the site address in the address bar is correct (for example, google.com, not goggle.com).'
+        ]
+        message = 'I\'ve prepared some InfoSec recommendations for you.\n\n'
+        for index, rec in enumerate(recommendations):
+            message += f'{index + 1}. {rec}\n'
+        return BotAnswer(message)
 
     def password_generation_methods(self, length):
         # second parameter of bot answer should be a keyboard with possible generation variants
@@ -109,11 +127,12 @@ class PasswordsBot:
 
     def check_password_strength(self, password):
 
-        # checking password complexity
+        # checking password strength
 
         score = 0
         message = ''
 
+        # analyzing password's length
         if len(password) <= 6:
             pass
         elif len(password) <= 8:
@@ -127,6 +146,7 @@ class PasswordsBot:
         else:
             score += 5
 
+        # analyzing password's variety of symbols
         if re.search(r"[A-Z]", password):
             score += 1.5
         if re.search(r"[a-z]", password):
@@ -136,6 +156,7 @@ class PasswordsBot:
         if re.search(r"[!@#$%^&*()№'+=]", password):
             score += 1.5
 
+        # analyzing number of symbols repetitions
         repetitions = 0
         for i in range(1, len(password)):
             if password[i] == password[i - 1]: repetitions += 1
@@ -157,7 +178,8 @@ class PasswordsBot:
             if a <= score < b:
                 message += m + "\n\n"
 
-        # Checking if password in leaked databases
+        # Checking if password is in leaked databases
+
         sha1_hash = hashlib.sha1(password.encode()).hexdigest().upper()
         prefix = sha1_hash[:5:]
         suffix = sha1_hash[5::]
@@ -167,6 +189,7 @@ class PasswordsBot:
         # with number of occurrences of the hash in bases of hacked passwords.
         suffixes = list(map(lambda x: x.split(':')[0], res.text.split('\r\n')))
         is_pawned = suffix in suffixes
-        message += 'WARNING! Your password is found in hacked password bases.' if is_pawned \
+        message += 'WARNING! Your password is found in hacked password bases. ' \
+                   'I recommend you to change it  as soon as possible.' if is_pawned \
             else 'Great! Your password is not in leaked passwords databases.'
         return BotAnswer(message)
